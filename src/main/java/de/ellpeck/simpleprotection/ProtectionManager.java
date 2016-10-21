@@ -3,9 +3,11 @@ package de.ellpeck.simpleprotection;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldSavedData;
@@ -50,30 +52,32 @@ public final class ProtectionManager{
 
     @SubscribeEvent
     public static void onBlockBreak(BlockEvent.BreakEvent event){
-        if(!checkAllowBlock(event.getWorld(), event.getPos(), event.getState(), false)){
+        if(!isOp(event.getPlayer()) && !checkAllowBlock(event.getWorld(), event.getPos(), event.getState(), false)){
             event.setCanceled(true);
         }
     }
 
     @SubscribeEvent
     public static void onBlockPlace(BlockEvent.PlaceEvent event){
-        if(!checkAllowBlock(event.getWorld(), event.getPos(), event.getPlacedBlock(), false)){
+        if(!isOp(event.getPlayer()) && !checkAllowBlock(event.getWorld(), event.getPos(), event.getPlacedBlock(), false)){
             event.setCanceled(true);
         }
     }
 
     @SubscribeEvent
     public static void onBlockInteract(PlayerInteractEvent.RightClickBlock event){
-        boolean blockOkay = checkAllowBlock(event.getWorld(), event.getPos(), event.getWorld().getBlockState(event.getPos()), true);
-        boolean itemOkay = event.getItemStack() == null || checkAllowItem(event.getWorld(), event.getPos(), event.getItemStack());
-        if(!blockOkay || !itemOkay){
-            event.setCanceled(true);
+        if(!isOp(event.getEntityPlayer())){
+            boolean blockOkay = checkAllowBlock(event.getWorld(), event.getPos(), event.getWorld().getBlockState(event.getPos()), true);
+            boolean itemOkay = event.getItemStack() == null || checkAllowItem(event.getWorld(), event.getPos(), event.getItemStack());
+            if(!blockOkay || !itemOkay){
+                event.setCanceled(true);
+            }
         }
     }
 
     @SubscribeEvent
     public static void onItemInteract(PlayerInteractEvent.RightClickItem event){
-        if(event.getItemStack() != null){
+        if(!isOp(event.getEntityPlayer()) && event.getItemStack() != null){
             if(!checkAllowItem(event.getWorld(), event.getPos(), event.getItemStack())){
                 event.setCanceled(true);
             }
@@ -117,6 +121,17 @@ public final class ProtectionManager{
         return true;
     }
 
+    private static boolean isOp(EntityPlayer player){
+        if(player != null){
+            MinecraftServer server = player.getServer();
+            if(server != null){
+                int level = server.getPlayerList().getOppedPlayers().getPermissionLevel(player.getGameProfile());
+                int levelNeeded = server.getOpPermissionLevel();
+                return level >= levelNeeded;
+            }
+        }
+        return false;
+    }
 
     @SubscribeEvent
     public static void onWorldLoad(WorldEvent.Load event){
