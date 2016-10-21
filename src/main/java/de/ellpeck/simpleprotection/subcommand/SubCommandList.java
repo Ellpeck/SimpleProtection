@@ -2,47 +2,46 @@ package de.ellpeck.simpleprotection.subcommand;
 
 import de.ellpeck.simpleprotection.ProtectedArea;
 import de.ellpeck.simpleprotection.ProtectionManager;
-import net.minecraft.command.CommandBase;
-import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.command.SyntaxErrorException;
+import net.minecraft.command.*;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.oredict.OreDictionary;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-public class SubCommandUnprotect extends CommandBase{
+public class SubCommandList extends CommandBase{
 
     @Override
     public String getCommandName(){
-        return "unprotect";
+        return "list";
     }
 
     @Override
     public String getCommandUsage(ICommandSender sender){
-        return "Use '/simpleprotection unprotect <name>' to remove the specified area. Use '/simpleprotection unprotect' to remove the stored first location of a protection that is being created.";
+        return "Use '/simpleprotection list <name> <type>' to view the white/blacklist of the specified area. The type can be 'interact', 'break', or 'item'.";
     }
 
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException{
-        if(args.length == 1){
-            if(ProtectionManager.TEMP_POSITIONS.containsKey(sender)){
-                ProtectionManager.TEMP_POSITIONS.remove(sender);
-                notifyCommandListener(sender, this, "Removed stored position for sender!");
-                return;
-            }
-            else{
-                throw new CommandException("No stored position present for sender!");
-            }
-        }
-        else if(args.length == 2){
+        if(args.length == 3){
             ProtectedArea area = ProtectionManager.byName(args[1]);
             if(area != null){
-                ProtectionManager.PROTECTED_AREAS.remove(area);
-                notifyCommandListener(sender, this, "Removed area "+area.toString()+".");
-                return;
+                Map<String, Integer> map = area.getListByKey(args[2]);
+                if(map != null){
+                    notifyCommandListener(sender, this, "There are "+map.size()+" items on this list: ");
+                    for(String strg : map.keySet()){
+                        notifyCommandListener(sender, this, strg+"@"+map.get(strg));
+                    }
+                    return;
+                }
+                else{
+                    throw new CommandException("The type is wrong. It needs to be either 'interact', 'break', or 'item'.");
+                }
             }
             else{
                 throw new CommandException("Area by that name not found!");
@@ -60,6 +59,9 @@ public class SubCommandUnprotect extends CommandBase{
                 names.add(area.name);
             }
             return getListOfStringsMatchingLastWord(args, names);
+        }
+        else if(args.length == 3){
+            return getListOfStringsMatchingLastWord(args, "interact", "break", "item");
         }
         else{
             return super.getTabCompletionOptions(server, sender, args, pos);

@@ -1,9 +1,15 @@
 package de.ellpeck.simpleprotection;
 
+import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,5 +42,74 @@ public final class ProtectionManager{
             }
         }
         return null;
+    }
+
+    @SubscribeEvent
+    public static void onBlockBreak(BlockEvent.BreakEvent event){
+        if(!checkAllowBlock(event.getWorld(), event.getPos(), event.getState(), false)){
+            event.setCanceled(true);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onBlockPlace(BlockEvent.PlaceEvent event){
+        if(!checkAllowBlock(event.getWorld(), event.getPos(), event.getPlacedBlock(), false)){
+            event.setCanceled(true);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onBlockInteract(PlayerInteractEvent.RightClickBlock event){
+        boolean blockOkay = checkAllowBlock(event.getWorld(), event.getPos(), event.getWorld().getBlockState(event.getPos()), true);
+        boolean itemOkay = event.getItemStack() == null || checkAllowItem(event.getWorld(), event.getPos(), event.getItemStack());
+        if(!blockOkay || !itemOkay){
+            event.setCanceled(true);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onItemInteract(PlayerInteractEvent.RightClickItem event){
+        if(event.getItemStack() != null){
+            if(!checkAllowItem(event.getWorld(), event.getPos(), event.getItemStack())){
+                event.setCanceled(true);
+            }
+        }
+    }
+
+    private static boolean checkAllowBlock(World world, BlockPos pos, IBlockState state, boolean interact){
+        if(state != null){
+            Block block = state.getBlock();
+            if(block != null){
+                String name = block.getRegistryName().toString();
+                int meta = block.getMetaFromState(state);
+
+                List<ProtectedArea> areas = getAreasForPos(world, pos);
+                if(!areas.isEmpty()){
+                    for(ProtectedArea area : areas){
+                        Map<String, Integer> map = interact ? area.interactBlocks : area.placeBreakBlocks;
+                        boolean whitelist = interact ? area.isInteractBlocksWhitelist : area.isPlaceBreakBlocksWhitelist;
+                        if(!ProtectedArea.isAllowed(map, name, meta, whitelist)){
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    private static boolean checkAllowItem(World world, BlockPos pos, ItemStack stack){
+        if(stack != null){
+            List<ProtectedArea> areas = getAreasForPos(world, pos);
+            if(!areas.isEmpty()){
+                String name = stack.getItem().getRegistryName().toString();
+                for(ProtectedArea area : areas){
+                    if(!ProtectedArea.isAllowed(area.items, name, stack.getItemDamage(), area.isItemsWhitelist)){
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
 }

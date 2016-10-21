@@ -1,9 +1,6 @@
 package de.ellpeck.simpleprotection;
 
-import de.ellpeck.simpleprotection.subcommand.SubCommandHelp;
-import de.ellpeck.simpleprotection.subcommand.SubCommandProtect;
-import de.ellpeck.simpleprotection.subcommand.SubCommandQuery;
-import de.ellpeck.simpleprotection.subcommand.SubCommandUnprotect;
+import de.ellpeck.simpleprotection.subcommand.*;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -26,6 +23,11 @@ public class CommandProtection extends CommandBase{
         this.subCommands.add(new SubCommandQuery());
         this.subCommands.add(new SubCommandProtect());
         this.subCommands.add(new SubCommandUnprotect());
+        this.subCommands.add(new SubCommandVisualize());
+        this.subCommands.add(new SubCommandAddBlock());
+        this.subCommands.add(new SubCommandAddItem());
+        this.subCommands.add(new SubCommandList());
+        this.subCommands.add(new SubCommandRemove());
     }
 
     @Override

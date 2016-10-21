@@ -1,7 +1,5 @@
 package de.ellpeck.simpleprotection;
 
-import net.minecraft.block.Block;
-import net.minecraft.item.Item;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -12,15 +10,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ProtectedArea{
+
     public String name;
     public int dimension;
     public AxisAlignedBB bound;
 
-    public boolean isBlockWhitelist;
-    public Map<Block, Integer> blockList = new HashMap<Block, Integer>();
+    public boolean isPlaceBreakBlocksWhitelist;
+    public Map<String, Integer> placeBreakBlocks = new HashMap<String, Integer>();
 
-    public boolean isItemWhitelist;
-    public Map<Item, Integer> itemList = new HashMap<Item, Integer>();
+    public boolean isInteractBlocksWhitelist;
+    public Map<String, Integer> interactBlocks = new HashMap<String, Integer>();
+
+    public boolean isItemsWhitelist;
+    public Map<String, Integer> items = new HashMap<String, Integer>();
 
     public ProtectedArea(String name, int dimension, AxisAlignedBB bound){
         this.name = name;
@@ -32,24 +34,27 @@ public class ProtectedArea{
         return world.provider.getDimension() == this.dimension && this.bound.isVecInside(new Vec3d(pos));
     }
 
-    public boolean isAllowed(Block block, int meta){
-        if(this.blockList.containsKey(block)){
-            int expected = this.blockList.get(block);
+    public static boolean isAllowed(Map<String, Integer> list, String item, int meta, boolean isWhitelist){
+        if(list.containsKey(item)){
+            int expected = list.get(item);
             if(expected == OreDictionary.WILDCARD_VALUE || meta == expected){
-                return this.isBlockWhitelist;
+                return isWhitelist;
             }
         }
-        return !this.isBlockWhitelist;
+        return !isWhitelist;
     }
 
-    public boolean isAllowed(Item item, int meta){
-        if(this.itemList.containsKey(item)){
-            int expected = this.itemList.get(item);
-            if(expected == OreDictionary.WILDCARD_VALUE || meta == expected){
-                return this.isItemWhitelist;
-            }
+    public Map<String, Integer> getListByKey(String key){
+        if("interact".equals(key)){
+            return this.interactBlocks;
         }
-        return !this.isItemWhitelist;
+        else if("break".equals(key)){
+            return this.placeBreakBlocks;
+        }
+        else if("item".equals(key)){
+            return this.items;
+        }
+        return null;
     }
 
     @Override

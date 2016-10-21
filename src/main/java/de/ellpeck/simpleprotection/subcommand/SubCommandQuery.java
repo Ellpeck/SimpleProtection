@@ -32,7 +32,7 @@ public class SubCommandQuery extends CommandBase{
 
     @Override
     public String getCommandUsage(ICommandSender sender){
-        return "Use '/simpleprotection query' to query the current location. Append a location's name to query it.";
+        return "Use '/simpleprotection query' to query the current location. Use '/simpleprotection query <name>' to query the specified area. Use '/simpleprotection query *' to query all areas.";
     }
 
     @Override
@@ -40,7 +40,7 @@ public class SubCommandQuery extends CommandBase{
         if(args.length == 1){
             List<ProtectedArea> areas = ProtectionManager.getAreasForPos(sender.getEntityWorld(), sender.getPosition());
             if(!areas.isEmpty()){
-                notifyCommandListener(sender, this, "There are "+areas.size()+" protections present.");
+                notifyCommandListener(sender, this, "There are "+areas.size()+" protections present:");
                 for(ProtectedArea area : areas){
                     notifyCommandListener(sender, this, area.toString());
                 }
@@ -52,13 +52,22 @@ public class SubCommandQuery extends CommandBase{
             }
         }
         else if(args.length == 2){
-            ProtectedArea area = ProtectionManager.byName(args[1]);
-            if(area != null){
-                notifyCommandListener(sender, this, area.toString());
+            if("*".equals(args[1])){
+                notifyCommandListener(sender, this, "In total, there are "+ProtectionManager.PROTECTED_AREAS.size()+" protections present:");
+                for(ProtectedArea area : ProtectionManager.PROTECTED_AREAS){
+                    notifyCommandListener(sender, this, area.toString());
+                }
                 return;
             }
             else{
-                throw new CommandException("Area by that name not found!");
+                ProtectedArea area = ProtectionManager.byName(args[1]);
+                if(area != null){
+                    notifyCommandListener(sender, this, area.toString());
+                    return;
+                }
+                else{
+                    throw new CommandException("Area by that name not found!");
+                }
             }
         }
 
