@@ -93,6 +93,8 @@ public final class ProtectionManager{
 
                 List<ProtectedArea> areas = getAreasForPos(player.getEntityWorld(), pos);
                 if(!areas.isEmpty()){
+
+                    boolean result = true;
                     for(ProtectedArea area : areas){
                         if(ProtectedArea.isAllowed(area.players, player.getName(), 0, !area.isPlayersWhitelist)){
                             return true;
@@ -101,10 +103,11 @@ public final class ProtectionManager{
                             Map<String, Integer> map = interact ? area.interactBlocks : area.placeBreakBlocks;
                             boolean whitelist = interact ? area.isInteractBlocksWhitelist : area.isPlaceBreakBlocksWhitelist;
                             if(!ProtectedArea.isAllowed(map, name, meta, whitelist)){
-                                return false;
+                                result = false;
                             }
                         }
                     }
+                    return result;
                 }
             }
         }
@@ -116,14 +119,17 @@ public final class ProtectionManager{
             List<ProtectedArea> areas = getAreasForPos(player.getEntityWorld(), pos);
             if(!areas.isEmpty()){
                 String name = stack.getItem().getRegistryName().toString();
+
+                boolean result = true;
                 for(ProtectedArea area : areas){
                     if(ProtectedArea.isAllowed(area.players, player.getName(), 0, !area.isPlayersWhitelist)){
                         return true;
                     }
                     else if(!ProtectedArea.isAllowed(area.items, name, stack.getItemDamage(), area.isItemsWhitelist)){
-                        return false;
+                        result = false;
                     }
                 }
+                return result;
             }
         }
         return true;
