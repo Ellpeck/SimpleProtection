@@ -38,7 +38,7 @@ public class SubCommandHelp extends CommandBase{
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException{
         if(args.length == 1){
-            notifyCommandListener(sender, this, "Possible subcommands:");
+            notifyCommandListener(sender, this, "Possible subcommands: (use '/simpleprotection help <subname>' to get information about a specific one.)");
             for(CommandBase sub : ProtectionManager.COMMAND.subCommands){
                 notifyCommandListener(sender, this, "/simpleprotection "+sub.getCommandName());
             }
