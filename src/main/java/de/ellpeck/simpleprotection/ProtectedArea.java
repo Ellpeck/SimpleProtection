@@ -1,5 +1,7 @@
 package de.ellpeck.simpleprotection;
 
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -57,8 +59,65 @@ public class ProtectedArea{
         return null;
     }
 
+    public NBTTagCompound writeToNBT(NBTTagCompound compound){
+        compound.setString("Name", this.name);
+        compound.setInteger("Dimension", this.dimension);
+
+        compound.setDouble("MinX", this.bound.minX);
+        compound.setDouble("MinY", this.bound.minY);
+        compound.setDouble("MinZ", this.bound.minZ);
+        compound.setDouble("MaxX", this.bound.maxX);
+        compound.setDouble("MaxY", this.bound.maxY);
+        compound.setDouble("MaxZ", this.bound.maxZ);
+
+        compound.setTag("Interact", saveList(this.interactBlocks));
+        compound.setTag("Break", saveList(this.placeBreakBlocks));
+        compound.setTag("Item", saveList(this.items));
+
+        compound.setBoolean("InteractWhite", this.isInteractBlocksWhitelist);
+        compound.setBoolean("BreakWhite", this.isPlaceBreakBlocksWhitelist);
+        compound.setBoolean("ItemWhite", this.isItemsWhitelist);
+
+        return compound;
+    }
+
+    public void readFromNBT(NBTTagCompound compound){
+        this.name = compound.getString("Name");
+        this.dimension = compound.getInteger("Dimension");
+
+        this.bound = new AxisAlignedBB(compound.getDouble("MinX"), compound.getDouble("MinY"), compound.getDouble("MinZ"), compound.getDouble("MaxX"), compound.getDouble("MaxY"), compound.getDouble("MaxZ"));
+
+        this.interactBlocks = loadList(compound.getTagList("Interact", 10));
+        this.placeBreakBlocks = loadList(compound.getTagList("Break", 10));
+        this.items = loadList(compound.getTagList("Item", 10));
+
+        this.isInteractBlocksWhitelist = compound.getBoolean("InteractWhite");
+        this.isPlaceBreakBlocksWhitelist = compound.getBoolean("BreakWhite");
+        this.isItemsWhitelist = compound.getBoolean("ItemWhite");
+    }
+
     @Override
     public String toString(){
         return "'"+this.name+"', Dim: "+this.dimension+", Area: "+this.bound;
+    }
+
+    private static NBTTagList saveList(Map<String, Integer> map){
+        NBTTagList interact = new NBTTagList();
+        for(String key : map.keySet()){
+            NBTTagCompound data = new NBTTagCompound();
+            data.setString("Key", key);
+            data.setInteger("Value", map.get(key));
+            interact.appendTag(data);
+        }
+        return interact;
+    }
+
+    private static Map<String, Integer> loadList(NBTTagList list){
+        Map<String, Integer> map = new HashMap<String, Integer>();
+        for(int i = 0; i < list.tagCount(); i++){
+            NBTTagCompound data = list.getCompoundTagAt(i);
+            map.put(data.getString("Key"), data.getInteger("Value"));
+        }
+        return map;
     }
 }

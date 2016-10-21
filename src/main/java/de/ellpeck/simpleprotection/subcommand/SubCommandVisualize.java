@@ -2,7 +2,10 @@ package de.ellpeck.simpleprotection.subcommand;
 
 import de.ellpeck.simpleprotection.ProtectedArea;
 import de.ellpeck.simpleprotection.ProtectionManager;
-import net.minecraft.command.*;
+import net.minecraft.command.CommandBase;
+import net.minecraft.command.CommandException;
+import net.minecraft.command.ICommandSender;
+import net.minecraft.command.SyntaxErrorException;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.EnumParticleTypes;
@@ -48,8 +51,19 @@ public class SubCommandVisualize extends CommandBase{
                     for(double x = area.bound.minX; x <= area.bound.maxX; x++){
                         for(double y = area.bound.minY; y <= area.bound.maxY; y++){
                             for(double z = area.bound.minZ; z <= area.bound.maxZ; z++){
-                                if(x == area.bound.minX || x == area.bound.maxX || y == area.bound.minY || y == area.bound.maxY || z == area.bound.minZ || z == area.bound.maxZ){
-                                    ((WorldServer)world).spawnParticle((EntityPlayerMP)sender, EnumParticleTypes.END_ROD, true, x+0.5, y+0.5, z+0.5, 1, 0, 0, 0, 0);
+                                int count = 0;
+                                if(x == area.bound.minX || x == area.bound.maxX){
+                                    count++;
+                                }
+                                if(y == area.bound.minY || y == area.bound.maxY){
+                                    count++;
+                                }
+                                if(z == area.bound.minZ || z == area.bound.maxZ){
+                                    count++;
+                                }
+
+                                if(count >= 2){
+                                    ((WorldServer)world).spawnParticle((EntityPlayerMP)sender, EnumParticleTypes.BARRIER, true, x+0.5, y+0.5, z+0.5, 1, 0, 0, 0, 0);
                                 }
                             }
                         }

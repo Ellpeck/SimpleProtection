@@ -28,6 +28,8 @@ public class CommandProtection extends CommandBase{
         this.subCommands.add(new SubCommandAddItem());
         this.subCommands.add(new SubCommandList());
         this.subCommands.add(new SubCommandRemove());
+        this.subCommands.add(new SubCommandSwitch());
+        this.subCommands.add(new SubCommandExpand());
     }
 
     @Override

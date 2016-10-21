@@ -36,15 +36,18 @@ public class SubCommandProtect extends CommandBase{
         }
         else if(args.length == 2){
             if(ProtectionManager.TEMP_POSITIONS.containsKey(sender)){
-                BlockPos firstPos = ProtectionManager.TEMP_POSITIONS.get(sender);
-                ProtectionManager.TEMP_POSITIONS.remove(sender);
+                if(ProtectionManager.byName(args[1]) == null){
+                    BlockPos firstPos = ProtectionManager.TEMP_POSITIONS.get(sender);
+                    ProtectionManager.TEMP_POSITIONS.remove(sender);
 
-                AxisAlignedBB bound = new AxisAlignedBB(firstPos, sender.getPosition());
-                ProtectedArea area = new ProtectedArea(args[1], sender.getEntityWorld().provider.getDimension(), bound);
-                ProtectionManager.PROTECTED_AREAS.add(area);
+                    AxisAlignedBB bound = new AxisAlignedBB(firstPos, sender.getPosition());
+                    ProtectedArea area = new ProtectedArea(args[1], sender.getEntityWorld().provider.getDimension(), bound);
+                    ProtectionManager.PROTECTED_AREAS.add(area);
 
-                notifyCommandListener(sender, this, "Area "+area+" created!");
-                return;
+                    notifyCommandListener(sender, this, "Area "+area+" created!");
+                    return;
+                }
+                else throw new CommandException("There is already an area with the name "+args[1]+"!");
             }
             else{
                 throw new SyntaxErrorException("First point not marked yet!");

@@ -4,10 +4,14 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldSavedData;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.BlockEvent;
+import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
@@ -111,5 +115,67 @@ public final class ProtectionManager{
             }
         }
         return true;
+    }
+
+
+    @SubscribeEvent
+    public static void onWorldLoad(WorldEvent.Load event){
+        if(!event.getWorld().isRemote){
+            WorldData.get(event.getWorld()).markDirty();
+        }
+    }
+
+    @SubscribeEvent
+    public static void onWorldSave(WorldEvent.Save event){
+        if(!event.getWorld().isRemote){
+            WorldData.get(event.getWorld()).markDirty();
+        }
+    }
+
+    public static class WorldData extends WorldSavedData{
+
+        private static final String DATA_ID = "ProtectionManagerData";
+
+        public WorldData(String id){
+            super(id);
+        }
+
+        @Override
+        public void readFromNBT(NBTTagCompound compound){
+            PROTECTED_AREAS.clear();
+
+            NBTTagList list = compound.getTagList("Protections", 10);
+            for(int i = 0; i < list.tagCount(); i++){
+                ProtectedArea area = new ProtectedArea(null, 0, null);
+                area.readFromNBT(list.getCompoundTagAt(i));
+                PROTECTED_AREAS.add(area);
+            }
+        }
+
+        @Override
+        public NBTTagCompound writeToNBT(NBTTagCompound compound){
+            NBTTagList list = new NBTTagList();
+            for(ProtectedArea area : PROTECTED_AREAS){
+                list.appendTag(area.writeToNBT(new NBTTagCompound()));
+            }
+            compound.setTag("Protections", list);
+
+            return compound;
+        }
+
+        public static WorldData get(World world){
+            if(world.getMapStorage() != null){
+                WorldData data = (WorldData)world.getMapStorage().getOrLoadData(WorldData.class, DATA_ID);
+                if(data == null){
+                    data = new WorldData(DATA_ID);
+                    data.markDirty();
+                    world.getMapStorage().setData(DATA_ID, data);
+                }
+                return data;
+            }
+            else{
+                return null;
+            }
+        }
     }
 }

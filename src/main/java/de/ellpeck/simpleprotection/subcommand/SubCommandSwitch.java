@@ -2,28 +2,27 @@ package de.ellpeck.simpleprotection.subcommand;
 
 import de.ellpeck.simpleprotection.ProtectedArea;
 import de.ellpeck.simpleprotection.ProtectionManager;
-import net.minecraft.command.*;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
+import net.minecraft.command.CommandBase;
+import net.minecraft.command.CommandException;
+import net.minecraft.command.ICommandSender;
+import net.minecraft.command.SyntaxErrorException;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.oredict.OreDictionary;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-public class SubCommandList extends CommandBase{
+public class SubCommandSwitch extends CommandBase{
 
     @Override
     public String getCommandName(){
-        return "list";
+        return "switch";
     }
 
     @Override
     public String getCommandUsage(ICommandSender sender){
-        return "Use '/simpleprotection list <name> <type>' to view the white/blacklist of the specified area. The type can be 'interact', 'break', or 'item'.";
+        return "Use '/simpleprotection switch <name> <type>' to switch a specified area's whitelist to a blacklist and vice versa. The type can be 'interact', 'break', or 'item'.";
     }
 
     @Override
@@ -31,24 +30,19 @@ public class SubCommandList extends CommandBase{
         if(args.length == 3){
             ProtectedArea area = ProtectionManager.byName(args[1]);
             if(area != null){
-                Map<String, Integer> map = area.getListByKey(args[2]);
-                if(map != null){
-                    boolean whitelist;
-                    if("interact".equals(args[2])){
-                        whitelist = area.isInteractBlocksWhitelist;
-                    }
-                    else if("break".equals(args[2])){
-                        whitelist = area.isPlaceBreakBlocksWhitelist;
-                    }
-                    else{
-                        whitelist = area.isItemsWhitelist;
-                    }
-                    notifyCommandListener(sender, this, "This list is in "+(whitelist ? "whitelist" : "blacklist")+" mode!");
-
-                    notifyCommandListener(sender, this, "There are "+map.size()+" items on this list: ");
-                    for(String strg : map.keySet()){
-                        notifyCommandListener(sender, this, strg+"@"+map.get(strg));
-                    }
+                if("interact".equals(args[2])){
+                    area.isInteractBlocksWhitelist = !area.isInteractBlocksWhitelist;
+                    notifyCommandListener(sender, this, "Switched the block interaction of the area "+area+" to be a "+(area.isInteractBlocksWhitelist ? "whitelist" : "blacklist")+".");
+                    return;
+                }
+                else if("break".equals(args[2])){
+                    area.isPlaceBreakBlocksWhitelist = !area.isPlaceBreakBlocksWhitelist;
+                    notifyCommandListener(sender, this, "Switched the block breaking and placing of the area "+area+" to be a "+(area.isPlaceBreakBlocksWhitelist ? "whitelist" : "blacklist")+".");
+                    return;
+                }
+                else if("item".equals(args[2])){
+                    area.isItemsWhitelist = !area.isItemsWhitelist;
+                    notifyCommandListener(sender, this, "Switched the item usage of the area "+area+" to be a "+(area.isItemsWhitelist ? "whitelist" : "blacklist")+".");
                     return;
                 }
                 else{
