@@ -6,6 +6,7 @@ import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.SyntaxErrorException;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.EnumParticleTypes;
@@ -36,51 +37,62 @@ public class SubCommandVisualize extends CommandBase{
 
     @Override
     public String getCommandUsage(ICommandSender sender){
-        return "Use '/simpleprotection visualize <name>' to visualize a protected area.";
+        return "Use '/simpleprotection visualize <name>' to visualize a protected area. Use '/simpleprotection visualize *' to visualize all areas.";
     }
 
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException{
         if(args.length == 2){
-            ProtectedArea area = ProtectionManager.byName(args[1]);
-            if(area != null){
-                notifyCommandListener(sender, this, "Visualizing area "+area+"!");
-
-                World world = sender.getEntityWorld();
-                if(world instanceof WorldServer && sender instanceof EntityPlayerMP){
-                    for(double x = area.bound.minX; x <= area.bound.maxX; x++){
-                        for(double y = area.bound.minY; y <= area.bound.maxY; y++){
-                            for(double z = area.bound.minZ; z <= area.bound.maxZ; z++){
-                                int count = 0;
-                                if(x == area.bound.minX || x == area.bound.maxX){
-                                    count++;
-                                }
-                                if(y == area.bound.minY || y == area.bound.maxY){
-                                    count++;
-                                }
-                                if(z == area.bound.minZ || z == area.bound.maxZ){
-                                    count++;
-                                }
-
-                                if(count >= 2){
-                                    ((WorldServer)world).spawnParticle((EntityPlayerMP)sender, EnumParticleTypes.BARRIER, true, x+0.5, y+0.5, z+0.5, 1, 0, 0, 0, 0);
-                                }
-                            }
-                        }
+            World world = sender.getEntityWorld();
+            if(world instanceof WorldServer && sender instanceof EntityPlayerMP){
+                if("*".equals(args[1])){
+                    for(ProtectedArea area : ProtectionManager.PROTECTED_AREAS){
+                        visualize(area, world, sender);
                     }
+                    notifyCommandListener(sender, this, "Visualizing all areas!");
+                    return;
                 }
                 else{
-                    throw new CommandException("Visualization can only be done by a player!");
+                    ProtectedArea area = ProtectionManager.byName(args[1]);
+                    if(area != null){
+                        notifyCommandListener(sender, this, "Visualizing area "+area+"!");
+                        visualize(area, world, sender);
+                        return;
+                    }
+                    else{
+                        throw new CommandException("Area by that name not found!");
+                    }
                 }
-
-                return;
             }
             else{
-                throw new CommandException("Area by that name not found!");
+                throw new CommandException("Visualization can only be done by a player!");
             }
         }
 
         throw new SyntaxErrorException("Wrong number of arguments!");
+    }
+
+    private static void visualize(ProtectedArea area, World world, ICommandSender sender){
+        for(double x = area.bound.minX; x <= area.bound.maxX; x++){
+            for(double y = area.bound.minY; y <= area.bound.maxY; y++){
+                for(double z = area.bound.minZ; z <= area.bound.maxZ; z++){
+                    int count = 0;
+                    if(x == area.bound.minX || x == area.bound.maxX){
+                        count++;
+                    }
+                    if(y == area.bound.minY || y == area.bound.maxY){
+                        count++;
+                    }
+                    if(z == area.bound.minZ || z == area.bound.maxZ){
+                        count++;
+                    }
+
+                    if(count >= 2){
+                        ((WorldServer)world).spawnParticle((EntityPlayerMP)sender, EnumParticleTypes.BARRIER, true, x+0.5, y+0.5, z+0.5, 1, 0, 0, 0, 0);
+                    }
+                }
+            }
+        }
     }
 
     @Override

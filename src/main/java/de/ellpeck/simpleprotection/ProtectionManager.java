@@ -52,14 +52,14 @@ public final class ProtectionManager{
 
     @SubscribeEvent
     public static void onBlockBreak(BlockEvent.BreakEvent event){
-        if(!isOp(event.getPlayer()) && !checkAllowBlock(event.getWorld(), event.getPos(), event.getState(), false)){
+        if(!isOp(event.getPlayer()) && !checkAllowBlock(event.getPlayer(), event.getPos(), event.getState(), false)){
             event.setCanceled(true);
         }
     }
 
     @SubscribeEvent
     public static void onBlockPlace(BlockEvent.PlaceEvent event){
-        if(!isOp(event.getPlayer()) && !checkAllowBlock(event.getWorld(), event.getPos(), event.getPlacedBlock(), false)){
+        if(!isOp(event.getPlayer()) && !checkAllowBlock(event.getPlayer(), event.getPos(), event.getPlacedBlock(), false)){
             event.setCanceled(true);
         }
     }
@@ -67,8 +67,8 @@ public final class ProtectionManager{
     @SubscribeEvent
     public static void onBlockInteract(PlayerInteractEvent.RightClickBlock event){
         if(!isOp(event.getEntityPlayer())){
-            boolean blockOkay = checkAllowBlock(event.getWorld(), event.getPos(), event.getWorld().getBlockState(event.getPos()), true);
-            boolean itemOkay = event.getItemStack() == null || checkAllowItem(event.getWorld(), event.getPos(), event.getItemStack());
+            boolean blockOkay = checkAllowBlock(event.getEntityPlayer(), event.getPos(), event.getWorld().getBlockState(event.getPos()), true);
+            boolean itemOkay = event.getItemStack() == null || checkAllowItem(event.getEntityPlayer(), event.getPos(), event.getItemStack());
             if(!blockOkay || !itemOkay){
                 event.setCanceled(true);
             }
@@ -78,26 +78,31 @@ public final class ProtectionManager{
     @SubscribeEvent
     public static void onItemInteract(PlayerInteractEvent.RightClickItem event){
         if(!isOp(event.getEntityPlayer()) && event.getItemStack() != null){
-            if(!checkAllowItem(event.getWorld(), event.getPos(), event.getItemStack())){
+            if(!checkAllowItem(event.getEntityPlayer(), event.getPos(), event.getItemStack())){
                 event.setCanceled(true);
             }
         }
     }
 
-    private static boolean checkAllowBlock(World world, BlockPos pos, IBlockState state, boolean interact){
+    private static boolean checkAllowBlock(EntityPlayer player, BlockPos pos, IBlockState state, boolean interact){
         if(state != null){
             Block block = state.getBlock();
             if(block != null){
                 String name = block.getRegistryName().toString();
                 int meta = block.getMetaFromState(state);
 
-                List<ProtectedArea> areas = getAreasForPos(world, pos);
+                List<ProtectedArea> areas = getAreasForPos(player.getEntityWorld(), pos);
                 if(!areas.isEmpty()){
                     for(ProtectedArea area : areas){
-                        Map<String, Integer> map = interact ? area.interactBlocks : area.placeBreakBlocks;
-                        boolean whitelist = interact ? area.isInteractBlocksWhitelist : area.isPlaceBreakBlocksWhitelist;
-                        if(!ProtectedArea.isAllowed(map, name, meta, whitelist)){
-                            return false;
+                        if(ProtectedArea.isAllowed(area.players, player.getName(), 0, !area.isPlayersWhitelist)){
+                            return true;
+                        }
+                        else{
+                            Map<String, Integer> map = interact ? area.interactBlocks : area.placeBreakBlocks;
+                            boolean whitelist = interact ? area.isInteractBlocksWhitelist : area.isPlaceBreakBlocksWhitelist;
+                            if(!ProtectedArea.isAllowed(map, name, meta, whitelist)){
+                                return false;
+                            }
                         }
                     }
                 }
@@ -106,13 +111,16 @@ public final class ProtectionManager{
         return true;
     }
 
-    private static boolean checkAllowItem(World world, BlockPos pos, ItemStack stack){
+    private static boolean checkAllowItem(EntityPlayer player, BlockPos pos, ItemStack stack){
         if(stack != null){
-            List<ProtectedArea> areas = getAreasForPos(world, pos);
+            List<ProtectedArea> areas = getAreasForPos(player.getEntityWorld(), pos);
             if(!areas.isEmpty()){
                 String name = stack.getItem().getRegistryName().toString();
                 for(ProtectedArea area : areas){
-                    if(!ProtectedArea.isAllowed(area.items, name, stack.getItemDamage(), area.isItemsWhitelist)){
+                    if(ProtectedArea.isAllowed(area.players, player.getName(), 0, !area.isPlayersWhitelist)){
+                        return true;
+                    }
+                    else if(!ProtectedArea.isAllowed(area.items, name, stack.getItemDamage(), area.isItemsWhitelist)){
                         return false;
                     }
                 }

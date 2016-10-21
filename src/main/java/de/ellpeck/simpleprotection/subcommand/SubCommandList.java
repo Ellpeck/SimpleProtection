@@ -23,7 +23,7 @@ public class SubCommandList extends CommandBase{
 
     @Override
     public String getCommandUsage(ICommandSender sender){
-        return "Use '/simpleprotection list <name> <type>' to view the white/blacklist of the specified area. The type can be 'interact', 'break', or 'item'.";
+        return "Use '/simpleprotection list <name> <type>' to view the white/blacklist of the specified area. The type can be 'interact', 'break', 'player' or 'item'.";
     }
 
     @Override
@@ -40,6 +40,9 @@ public class SubCommandList extends CommandBase{
                     else if("break".equals(args[2])){
                         whitelist = area.isPlaceBreakBlocksWhitelist;
                     }
+                    else if("player".equals(args[2])){
+                        whitelist = area.isPlayersWhitelist;
+                    }
                     else{
                         whitelist = area.isItemsWhitelist;
                     }
@@ -52,7 +55,7 @@ public class SubCommandList extends CommandBase{
                     return;
                 }
                 else{
-                    throw new CommandException("The type is wrong. It needs to be either 'interact', 'break', or 'item'.");
+                    throw new CommandException("The type is wrong. It needs to be either 'interact', 'break', 'player' or 'item'.");
                 }
             }
             else{
@@ -73,7 +76,7 @@ public class SubCommandList extends CommandBase{
             return getListOfStringsMatchingLastWord(args, names);
         }
         else if(args.length == 3){
-            return getListOfStringsMatchingLastWord(args, "interact", "break", "item");
+            return getListOfStringsMatchingLastWord(args, "interact", "break", "player", "item");
         }
         else{
             return super.getTabCompletionOptions(server, sender, args, pos);

@@ -22,7 +22,7 @@ public class SubCommandSwitch extends CommandBase{
 
     @Override
     public String getCommandUsage(ICommandSender sender){
-        return "Use '/simpleprotection switch <name> <type>' to switch a specified area's whitelist to a blacklist and vice versa. The type can be 'interact', 'break', or 'item'.";
+        return "Use '/simpleprotection switch <name> <type>' to switch a specified area's whitelist to a blacklist and vice versa. The type can be 'interact', 'break', 'player' or 'item'.";
     }
 
     @Override
@@ -45,8 +45,13 @@ public class SubCommandSwitch extends CommandBase{
                     notifyCommandListener(sender, this, "Switched the item usage of the area "+area+" to be a "+(area.isItemsWhitelist ? "whitelist" : "blacklist")+".");
                     return;
                 }
+                else if("player".equals(args[2])){
+                    area.isPlayersWhitelist = !area.isPlayersWhitelist;
+                    notifyCommandListener(sender, this, "Switched the player list of the area "+area+" to be a "+(area.isPlayersWhitelist ? "whitelist" : "blacklist")+".");
+                    return;
+                }
                 else{
-                    throw new CommandException("The type is wrong. It needs to be either 'interact', 'break', or 'item'.");
+                    throw new CommandException("The type is wrong. It needs to be either 'interact', 'break', 'player' or 'item'.");
                 }
             }
             else{
@@ -67,7 +72,7 @@ public class SubCommandSwitch extends CommandBase{
             return getListOfStringsMatchingLastWord(args, names);
         }
         else if(args.length == 3){
-            return getListOfStringsMatchingLastWord(args, "interact", "break", "item");
+            return getListOfStringsMatchingLastWord(args, "interact", "break", "player", "item");
         }
         else{
             return super.getTabCompletionOptions(server, sender, args, pos);

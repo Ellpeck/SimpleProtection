@@ -1,5 +1,6 @@
 package de.ellpeck.simpleprotection;
 
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -8,8 +9,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.oredict.OreDictionary;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class ProtectedArea{
 
@@ -25,6 +25,9 @@ public class ProtectedArea{
 
     public boolean isItemsWhitelist;
     public Map<String, Integer> items = new HashMap<String, Integer>();
+
+    public boolean isPlayersWhitelist;
+    public Map<String, Integer> players = new HashMap<String, Integer>();
 
     public ProtectedArea(String name, int dimension, AxisAlignedBB bound){
         this.name = name;
@@ -56,6 +59,9 @@ public class ProtectedArea{
         else if("item".equals(key)){
             return this.items;
         }
+        else if("player".equals(key)){
+            return this.players;
+        }
         return null;
     }
 
@@ -73,10 +79,12 @@ public class ProtectedArea{
         compound.setTag("Interact", saveList(this.interactBlocks));
         compound.setTag("Break", saveList(this.placeBreakBlocks));
         compound.setTag("Item", saveList(this.items));
+        compound.setTag("Player", saveList(this.players));
 
         compound.setBoolean("InteractWhite", this.isInteractBlocksWhitelist);
         compound.setBoolean("BreakWhite", this.isPlaceBreakBlocksWhitelist);
         compound.setBoolean("ItemWhite", this.isItemsWhitelist);
+        compound.setBoolean("PlayersWhite", this.isPlayersWhitelist);
 
         return compound;
     }
@@ -90,10 +98,12 @@ public class ProtectedArea{
         this.interactBlocks = loadList(compound.getTagList("Interact", 10));
         this.placeBreakBlocks = loadList(compound.getTagList("Break", 10));
         this.items = loadList(compound.getTagList("Item", 10));
+        this.players = loadList(compound.getTagList("Player", 10));
 
         this.isInteractBlocksWhitelist = compound.getBoolean("InteractWhite");
         this.isPlaceBreakBlocksWhitelist = compound.getBoolean("BreakWhite");
         this.isItemsWhitelist = compound.getBoolean("ItemWhite");
+        this.isPlayersWhitelist = compound.getBoolean("PlayersWhite");
     }
 
     @Override

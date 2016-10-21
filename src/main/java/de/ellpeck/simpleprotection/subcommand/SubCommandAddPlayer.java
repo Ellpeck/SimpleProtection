@@ -6,44 +6,39 @@ import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.SyntaxErrorException;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-public class SubCommandRemove extends CommandBase{
+public class SubCommandAddPlayer extends CommandBase{
 
     @Override
     public String getCommandName(){
-        return "remove";
+        return "addplayer";
     }
 
     @Override
     public String getCommandUsage(ICommandSender sender){
-        return "Use '/simpleprotection remove <name> <type> <item>' to remove an item, block or player from the white/blacklist of the specified area. The type can be 'interact', 'break', 'player' or 'item'.";
+        return "Use '/simpleprotection addplayer <name> <playername>' to add the specified player to the specified area's white/blacklist.";
     }
 
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException{
-        if(args.length == 4){
+        if(args.length == 3){
             ProtectedArea area = ProtectionManager.byName(args[1]);
             if(area != null){
-                Map<String, Integer> map = area.getListByKey(args[2]);
-                if(map != null){
-                    if(map.containsKey(args[3])){
-                        map.remove(args[3]);
-                        notifyCommandListener(sender, this, "Successfully removed "+args[3]+" from the list of area "+area+"!");
-                        return;
-                    }
-                    else{
-                        throw new CommandException("There is no item with the specified name present.");
-                    }
+                EntityPlayer player = server.getPlayerList().getPlayerByUsername(args[2]);
+                if(player != null){
+                    area.players.put(player.getName(), 0);
+                    notifyCommandListener(sender, this, "Successfully added player "+player+" to area "+area+"!");
+                    return;
                 }
                 else{
-                    throw new CommandException("The type is wrong. It needs to be either 'interact', 'break', 'player' or 'item'.");
+                    throw new CommandException("There isn't a player with the specified name!");
                 }
             }
             else{
@@ -64,17 +59,10 @@ public class SubCommandRemove extends CommandBase{
             return getListOfStringsMatchingLastWord(args, names);
         }
         else if(args.length == 3){
-            return getListOfStringsMatchingLastWord(args, "interact", "break", "player", "item");
+            return getListOfStringsMatchingLastWord(args, server.getPlayerList().getAllUsernames());
         }
-        else if(args.length == 4){
-            ProtectedArea area = ProtectionManager.byName(args[1]);
-            if(area != null){
-                Map<String, Integer> map = area.getListByKey(args[2]);
-                if(map != null){
-                    return getListOfStringsMatchingLastWord(args, map.keySet());
-                }
-            }
+        else{
+            return super.getTabCompletionOptions(server, sender, args, pos);
         }
-        return super.getTabCompletionOptions(server, sender, args, pos);
     }
 }
