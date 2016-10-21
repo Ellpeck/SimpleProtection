@@ -1,0 +1,19 @@
+[
+{
+  "modid": "simpleprotection",
+  "name": "Simple Protection",
+  "description": "A Minecraft that allows server admins to configure certain areas to allow and disallow certain things.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "http://github.com/Ellpeck/SimpleProtection",
+  "updateUrl": "",
+  "authorList": [ "Ellpeck" ],
+  "credits": "Author: Ellpeck",
+  "logoFile": "",
+  "screenshots": [
+  ],
+  "parent":"",
+  "dependencies": [
+  ]
+}
+]
