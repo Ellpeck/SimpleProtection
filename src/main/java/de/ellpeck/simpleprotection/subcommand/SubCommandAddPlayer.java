@@ -6,7 +6,6 @@ import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.SyntaxErrorException;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 
@@ -31,15 +30,9 @@ public class SubCommandAddPlayer extends CommandBase{
         if(args.length == 3){
             ProtectedArea area = ProtectionManager.byName(args[1]);
             if(area != null){
-                EntityPlayer player = server.getPlayerList().getPlayerByUsername(args[2]);
-                if(player != null){
-                    area.players.put(player.getName(), 0);
-                    notifyCommandListener(sender, this, "Successfully added player "+player+" to area "+area+"!");
-                    return;
-                }
-                else{
-                    throw new CommandException("There isn't a player with the specified name!");
-                }
+                area.players.put(args[2], 0);
+                notifyCommandListener(sender, this, "Successfully added player "+args[2]+" to area "+area+"!");
+                return;
             }
             else{
                 throw new CommandException("Area by that name not found!");
