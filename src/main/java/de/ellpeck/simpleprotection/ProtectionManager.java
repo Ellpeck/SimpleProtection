@@ -11,6 +11,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldSavedData;
+import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.event.world.WorldEvent;
@@ -52,21 +53,21 @@ public final class ProtectionManager{
 
     @SubscribeEvent
     public static void onBlockBreak(BlockEvent.BreakEvent event){
-        if(!isOp(event.getPlayer()) && !checkAllowBlock(event.getPlayer(), event.getPos(), event.getState(), false)){
+        if(!(event.getPlayer() instanceof FakePlayer) && !isOp(event.getPlayer()) && !checkAllowBlock(event.getPlayer(), event.getPos(), event.getState(), false)){
             event.setCanceled(true);
         }
     }
 
     @SubscribeEvent
     public static void onBlockPlace(BlockEvent.PlaceEvent event){
-        if(!isOp(event.getPlayer()) && !checkAllowBlock(event.getPlayer(), event.getPos(), event.getPlacedBlock(), false)){
+        if(!(event.getPlayer() instanceof FakePlayer) && !isOp(event.getPlayer()) && !checkAllowBlock(event.getPlayer(), event.getPos(), event.getPlacedBlock(), false)){
             event.setCanceled(true);
         }
     }
 
     @SubscribeEvent
     public static void onBlockInteract(PlayerInteractEvent.RightClickBlock event){
-        if(!isOp(event.getEntityPlayer())){
+        if(!(event.getEntityPlayer() instanceof FakePlayer) && !isOp(event.getEntityPlayer())){
             boolean blockOkay = checkAllowBlock(event.getEntityPlayer(), event.getPos(), event.getWorld().getBlockState(event.getPos()), true);
             boolean itemOkay = event.getItemStack() == null || checkAllowItem(event.getEntityPlayer(), event.getPos(), event.getItemStack());
             if(!blockOkay || !itemOkay){
@@ -77,7 +78,7 @@ public final class ProtectionManager{
 
     @SubscribeEvent
     public static void onItemInteract(PlayerInteractEvent.RightClickItem event){
-        if(!isOp(event.getEntityPlayer()) && event.getItemStack() != null){
+        if(!(event.getEntityPlayer() instanceof FakePlayer) && !isOp(event.getEntityPlayer()) && event.getItemStack() != null){
             if(!checkAllowItem(event.getEntityPlayer(), event.getPos(), event.getItemStack())){
                 event.setCanceled(true);
             }
