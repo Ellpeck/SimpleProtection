@@ -86,9 +86,11 @@ public final class ProtectionManager{
     }
 
     @SubscribeEvent
-    public static void onItemInteract(PlayerInteractEvent.LeftClickBlock event){
-        if(!(event.getEntityPlayer() instanceof FakePlayer) && !isOp(event.getEntityPlayer()) && event.getItemStack() != null){
-            if(!checkAllowItem(event.getEntityPlayer(), event.getPos(), event.getItemStack())){
+    public static void onBlockClick(PlayerInteractEvent.LeftClickBlock event){
+        if(!(event.getEntityPlayer() instanceof FakePlayer) && !isOp(event.getEntityPlayer())){
+            boolean blockOkay = checkAllowBlock(event.getEntityPlayer(), event.getPos(), event.getWorld().getBlockState(event.getPos()), true);
+            boolean itemOkay = event.getItemStack() == null || checkAllowItem(event.getEntityPlayer(), event.getPos(), event.getItemStack());
+            if(!blockOkay || !itemOkay){
                 event.setCanceled(true);
             }
         }
