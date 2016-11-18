@@ -16,6 +16,7 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.util.ArrayList;
@@ -87,12 +88,8 @@ public final class ProtectionManager{
 
     @SubscribeEvent
     public static void onBlockClick(PlayerInteractEvent.LeftClickBlock event){
-        if(!(event.getEntityPlayer() instanceof FakePlayer) && !isOp(event.getEntityPlayer())){
-            boolean blockOkay = checkAllowBlock(event.getEntityPlayer(), event.getPos(), event.getWorld().getBlockState(event.getPos()), true);
-            boolean itemOkay = event.getItemStack() == null || checkAllowItem(event.getEntityPlayer(), event.getPos(), event.getItemStack());
-            if(!blockOkay || !itemOkay){
-                event.setCanceled(true);
-            }
+        if(!(event.getEntityPlayer() instanceof FakePlayer) && !isOp(event.getEntityPlayer()) && !checkAllowBlock(event.getEntityPlayer(), event.getPos(), event.getWorld().getBlockState(event.getPos()), false)){
+            event.setUseBlock(Event.Result.DENY);
         }
     }
 
