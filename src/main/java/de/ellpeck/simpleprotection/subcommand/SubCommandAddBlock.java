@@ -9,6 +9,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.oredict.OreDictionary;
 
@@ -19,12 +20,12 @@ import java.util.List;
 public class SubCommandAddBlock extends CommandBase{
 
     @Override
-    public String getCommandName(){
+    public String getName(){
         return "addblock";
     }
 
     @Override
-    public String getCommandUsage(ICommandSender sender){
+    public String getUsage(ICommandSender sender){
         return "Use '/simpleprotection addblock <name> <type>' to add the block that is currently looked at to the specified area's white/blacklist. The type can be 'interact' or 'break', the latter also applies for placing. Append a * at the end to make the entry wildcard, meaning metadata will be ignored.";
     }
 
@@ -41,12 +42,12 @@ public class SubCommandAddBlock extends CommandBase{
                         EntityPlayerMP player = (EntityPlayerMP)sender;
                         RayTraceResult result = ForgeHooks.rayTraceEyes(player, player.interactionManager.getBlockReachDistance());
                         if(result != null && result.getBlockPos() != null){
-                            IBlockState state = player.worldObj.getBlockState(result.getBlockPos());
+                            IBlockState state = player.world.getBlockState(result.getBlockPos());
                             Block block = state.getBlock();
                             int meta = wildcard ? OreDictionary.WILDCARD_VALUE : block.getMetaFromState(state);
 
                             (interact ? area.interactBlocks : area.placeBreakBlocks).put(block.getRegistryName().toString(), meta);
-                            notifyCommandListener(sender, this, "Block "+block.getRegistryName()+" with meta "+meta+" was successfully added to "+(interact ? "interact" : "place/break")+" list of area "+area+"!");
+                            sender.sendMessage(new TextComponentString("Block "+block.getRegistryName()+" with meta "+meta+" was successfully added to "+(interact ? "interact" : "place/break")+" list of area "+area+"!"));
                             return;
                         }
                         else{
@@ -70,7 +71,7 @@ public class SubCommandAddBlock extends CommandBase{
     }
 
     @Override
-    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos){
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos){
         if(args.length == 2){
             List<String> names = new ArrayList<String>();
             for(ProtectedArea area : ProtectionManager.PROTECTED_AREAS){
@@ -82,7 +83,7 @@ public class SubCommandAddBlock extends CommandBase{
             return getListOfStringsMatchingLastWord(args, "interact", "break");
         }
         else{
-            return super.getTabCompletionOptions(server, sender, args, pos);
+            return super.getTabCompletions(server, sender, args, pos);
         }
     }
 }

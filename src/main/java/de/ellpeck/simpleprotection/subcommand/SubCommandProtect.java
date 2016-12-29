@@ -9,16 +9,17 @@ import net.minecraft.command.SyntaxErrorException;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentString;
 
 public class SubCommandProtect extends CommandBase{
 
     @Override
-    public String getCommandName(){
+    public String getName(){
         return "protect";
     }
 
     @Override
-    public String getCommandUsage(ICommandSender sender){
+    public String getUsage(ICommandSender sender){
         return "Use '/simpleprotection protect' to mark the first position at your location. Then, use use '/simpleprotection protect <name>' to mark the second position at your location and save the area.";
     }
 
@@ -30,7 +31,7 @@ public class SubCommandProtect extends CommandBase{
             }
             else{
                 ProtectionManager.TEMP_POSITIONS.put(sender, sender.getPosition());
-                notifyCommandListener(sender, this, "First point marked at "+sender.getPosition()+".");
+                sender.sendMessage(new TextComponentString("First point marked at "+sender.getPosition()+"."));
                 return;
             }
         }
@@ -44,7 +45,7 @@ public class SubCommandProtect extends CommandBase{
                     ProtectedArea area = new ProtectedArea(args[1], sender.getEntityWorld().provider.getDimension(), bound);
                     ProtectionManager.PROTECTED_AREAS.add(area);
 
-                    notifyCommandListener(sender, this, "Area "+area+" created!");
+                    sender.sendMessage(new TextComponentString("Area "+area+" created!"));
                     return;
                 }
                 else throw new CommandException("There is already an area with the name "+args[1]+"!");

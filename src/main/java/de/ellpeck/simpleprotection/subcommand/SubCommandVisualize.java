@@ -11,6 +11,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 
@@ -21,7 +22,7 @@ import java.util.List;
 public class SubCommandVisualize extends CommandBase{
 
     @Override
-    public String getCommandName(){
+    public String getName(){
         return "visualize";
     }
 
@@ -36,7 +37,7 @@ public class SubCommandVisualize extends CommandBase{
     }
 
     @Override
-    public String getCommandUsage(ICommandSender sender){
+    public String getUsage(ICommandSender sender){
         return "Use '/simpleprotection visualize <name>' to visualize a protected area. Use '/simpleprotection visualize *' to visualize all areas.";
     }
 
@@ -49,13 +50,13 @@ public class SubCommandVisualize extends CommandBase{
                     for(ProtectedArea area : ProtectionManager.PROTECTED_AREAS){
                         visualize(area, world, sender);
                     }
-                    notifyCommandListener(sender, this, "Visualizing all areas!");
+                    sender.sendMessage(new TextComponentString("Visualizing all areas!"));
                     return;
                 }
                 else{
                     ProtectedArea area = ProtectionManager.byName(args[1]);
                     if(area != null){
-                        notifyCommandListener(sender, this, "Visualizing area "+area+"!");
+                        sender.sendMessage(new TextComponentString("Visualizing area "+area+"!"));
                         visualize(area, world, sender);
                         return;
                     }
@@ -96,7 +97,7 @@ public class SubCommandVisualize extends CommandBase{
     }
 
     @Override
-    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos){
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos){
         if(args.length == 2){
             List<String> names = new ArrayList<String>();
             for(ProtectedArea area : ProtectionManager.PROTECTED_AREAS){
@@ -105,7 +106,7 @@ public class SubCommandVisualize extends CommandBase{
             return getListOfStringsMatchingLastWord(args, names);
         }
         else{
-            return super.getTabCompletionOptions(server, sender, args, pos);
+            return super.getTabCompletions(server, sender, args, pos);
         }
     }
 }

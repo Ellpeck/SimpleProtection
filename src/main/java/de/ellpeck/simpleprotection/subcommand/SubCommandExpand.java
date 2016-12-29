@@ -17,12 +17,12 @@ import java.util.List;
 
 public class SubCommandExpand extends CommandBase{
     @Override
-    public String getCommandName(){
+    public String getName(){
         return "expand";
     }
 
     @Override
-    public String getCommandUsage(ICommandSender sender){
+    public String getUsage(ICommandSender sender){
         return "Use '/simpleprotection expand <area> <x1> <y1> <z1> <x2> <y2> <z2>' to expand the specified area's bounds.";
     }
 
@@ -40,7 +40,7 @@ public class SubCommandExpand extends CommandBase{
                     int z2 = Integer.parseInt(args[7]);
                     area.bound = new AxisAlignedBB(area.bound.minX-x1, area.bound.minY-y1, area.bound.minZ-z1, area.bound.maxX+x2, area.bound.maxY+y2, area.bound.maxZ+z2);
 
-                    notifyCommandListener(sender, this, "Expanded area "+area+" by "+x1+", "+y1+", "+z1+", "+x2+", "+y2+", "+z2+"!");
+                    sender.sendMessage(new TextComponentString("Expanded area "+area+" by "+x1+", "+y1+", "+z1+", "+x2+", "+y2+", "+z2+"!"));
                     return;
                 }
                 catch(Exception e){
@@ -56,7 +56,7 @@ public class SubCommandExpand extends CommandBase{
     }
 
     @Override
-    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos){
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos){
         if(args.length == 2){
             List<String> names = new ArrayList<String>();
             for(ProtectedArea area : ProtectionManager.PROTECTED_AREAS){
@@ -65,7 +65,7 @@ public class SubCommandExpand extends CommandBase{
             return getListOfStringsMatchingLastWord(args, names);
         }
         else{
-            return super.getTabCompletionOptions(server, sender, args, pos);
+            return super.getTabCompletions(server, sender, args, pos);
         }
     }
 }

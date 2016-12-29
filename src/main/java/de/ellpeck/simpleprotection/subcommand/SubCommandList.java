@@ -7,6 +7,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.oredict.OreDictionary;
 
 import javax.annotation.Nullable;
@@ -17,12 +18,12 @@ import java.util.Map;
 public class SubCommandList extends CommandBase{
 
     @Override
-    public String getCommandName(){
+    public String getName(){
         return "list";
     }
 
     @Override
-    public String getCommandUsage(ICommandSender sender){
+    public String getUsage(ICommandSender sender){
         return "Use '/simpleprotection list <name> <type>' to view the white/blacklist of the specified area. The type can be 'interact', 'break', 'player' or 'item'.";
     }
 
@@ -46,11 +47,11 @@ public class SubCommandList extends CommandBase{
                     else{
                         whitelist = area.isItemsWhitelist;
                     }
-                    notifyCommandListener(sender, this, "This list is in "+(whitelist ? "whitelist" : "blacklist")+" mode!");
+                    sender.sendMessage(new TextComponentString("This list is in "+(whitelist ? "whitelist" : "blacklist")+" mode!"));
 
-                    notifyCommandListener(sender, this, "There are "+map.size()+" items on this list: ");
+                    sender.sendMessage(new TextComponentString("There are "+map.size()+" items on this list: "));
                     for(String strg : map.keySet()){
-                        notifyCommandListener(sender, this, strg+"@"+map.get(strg));
+                        sender.sendMessage(new TextComponentString(strg+"@"+map.get(strg)));
                     }
                     return;
                 }
@@ -67,7 +68,7 @@ public class SubCommandList extends CommandBase{
     }
 
     @Override
-    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos){
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos){
         if(args.length == 2){
             List<String> names = new ArrayList<String>();
             for(ProtectedArea area : ProtectionManager.PROTECTED_AREAS){
@@ -79,7 +80,7 @@ public class SubCommandList extends CommandBase{
             return getListOfStringsMatchingLastWord(args, "interact", "break", "player", "item");
         }
         else{
-            return super.getTabCompletionOptions(server, sender, args, pos);
+            return super.getTabCompletions(server, sender, args, pos);
         }
     }
 }

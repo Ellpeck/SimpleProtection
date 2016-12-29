@@ -34,7 +34,7 @@ public class CommandProtection extends CommandBase{
     }
 
     @Override
-    public String getCommandName(){
+    public String getName(){
         return "simpleprotection";
     }
 
@@ -49,12 +49,12 @@ public class CommandProtection extends CommandBase{
     }
 
     @Override
-    public List<String> getCommandAliases(){
+    public List<String> getAliases(){
         return Arrays.asList("simpleprot", "simprot", "prot");
     }
 
     @Override
-    public String getCommandUsage(ICommandSender sender){
+    public String getUsage(ICommandSender sender){
         return "/simpleprotection <subcommand>, use '/simpleprotection help' to see all subcommands.";
     }
 
@@ -62,7 +62,7 @@ public class CommandProtection extends CommandBase{
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException{
         if(args.length > 0){
             for(CommandBase sub : this.subCommands){
-                if(sub.getCommandName().equals(args[0])){
+                if(sub.getName().equals(args[0])){
                     if(sub.checkPermission(server, sender)){
                         sub.execute(server, sender, args);
                         return;
@@ -70,33 +70,33 @@ public class CommandProtection extends CommandBase{
                     else{
                         TextComponentTranslation info = new TextComponentTranslation("commands.generic.permission");
                         info.getStyle().setColor(TextFormatting.RED);
-                        sender.addChatMessage(info);
+                        sender.sendMessage(info);
                         return;
                     }
                 }
             }
         }
 
-        throw new WrongUsageException(this.getCommandUsage(sender));
+        throw new WrongUsageException(this.getUsage(sender));
     }
 
     @Override
-    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, BlockPos pos){
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, BlockPos pos){
         if(args == null || args.length <= 1){
             List<String> possibilities = new ArrayList<String>();
             for(CommandBase sub : this.subCommands){
-                possibilities.add(sub.getCommandName());
+                possibilities.add(sub.getName());
             }
             return getListOfStringsMatchingLastWord(args, possibilities);
         }
         else{
             for(CommandBase sub : this.subCommands){
-                if(sub.getCommandName().equals(args[0])){
-                    return sub.getTabCompletionOptions(server, sender, args, pos);
+                if(sub.getName().equals(args[0])){
+                    return sub.getTabCompletions(server, sender, args, pos);
                 }
             }
 
-            return super.getTabCompletionOptions(server, sender, args, pos);
+            return super.getTabCompletions(server, sender, args, pos);
         }
     }
 }

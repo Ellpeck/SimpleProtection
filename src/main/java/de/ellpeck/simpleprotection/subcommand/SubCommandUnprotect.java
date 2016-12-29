@@ -8,6 +8,7 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.command.SyntaxErrorException;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentString;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -16,12 +17,12 @@ import java.util.List;
 public class SubCommandUnprotect extends CommandBase{
 
     @Override
-    public String getCommandName(){
+    public String getName(){
         return "unprotect";
     }
 
     @Override
-    public String getCommandUsage(ICommandSender sender){
+    public String getUsage(ICommandSender sender){
         return "Use '/simpleprotection unprotect <name>' to remove the specified area. Use '/simpleprotection unprotect' to remove the stored first location of a protection that is being created.";
     }
 
@@ -30,7 +31,7 @@ public class SubCommandUnprotect extends CommandBase{
         if(args.length == 1){
             if(ProtectionManager.TEMP_POSITIONS.containsKey(sender)){
                 ProtectionManager.TEMP_POSITIONS.remove(sender);
-                notifyCommandListener(sender, this, "Removed stored position for sender!");
+                sender.sendMessage(new TextComponentString("Removed stored position for sender!"));
                 return;
             }
             else{
@@ -41,7 +42,7 @@ public class SubCommandUnprotect extends CommandBase{
             ProtectedArea area = ProtectionManager.byName(args[1]);
             if(area != null){
                 ProtectionManager.PROTECTED_AREAS.remove(area);
-                notifyCommandListener(sender, this, "Removed area "+area.toString()+".");
+                sender.sendMessage(new TextComponentString("Removed area "+area.toString()+"."));
                 return;
             }
             else{
@@ -53,7 +54,7 @@ public class SubCommandUnprotect extends CommandBase{
     }
 
     @Override
-    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos){
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos){
         if(args.length == 2){
             List<String> names = new ArrayList<String>();
             for(ProtectedArea area : ProtectionManager.PROTECTED_AREAS){
@@ -62,7 +63,7 @@ public class SubCommandUnprotect extends CommandBase{
             return getListOfStringsMatchingLastWord(args, names);
         }
         else{
-            return super.getTabCompletionOptions(server, sender, args, pos);
+            return super.getTabCompletions(server, sender, args, pos);
         }
     }
 }

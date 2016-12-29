@@ -8,6 +8,7 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.command.SyntaxErrorException;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentString;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -16,7 +17,7 @@ import java.util.List;
 public class SubCommandQuery extends CommandBase{
 
     @Override
-    public String getCommandName(){
+    public String getName(){
         return "query";
     }
 
@@ -31,7 +32,7 @@ public class SubCommandQuery extends CommandBase{
     }
 
     @Override
-    public String getCommandUsage(ICommandSender sender){
+    public String getUsage(ICommandSender sender){
         return "Use '/simpleprotection query' to query the current location. Use '/simpleprotection query <name>' to query the specified area. Use '/simpleprotection query *' to query all areas.";
     }
 
@@ -40,29 +41,29 @@ public class SubCommandQuery extends CommandBase{
         if(args.length == 1){
             List<ProtectedArea> areas = ProtectionManager.getAreasForPos(sender.getEntityWorld(), sender.getPosition());
             if(!areas.isEmpty()){
-                notifyCommandListener(sender, this, "There are "+areas.size()+" protections present:");
+                sender.sendMessage(new TextComponentString("There are "+areas.size()+" protections present:"));
                 for(ProtectedArea area : areas){
-                    notifyCommandListener(sender, this, area.toString());
+                    sender.sendMessage(new TextComponentString(area.toString()));
                 }
                 return;
             }
             else{
-                notifyCommandListener(sender, this, "This area isn't protected.");
+                sender.sendMessage(new TextComponentString("This area isn't protected."));
                 return;
             }
         }
         else if(args.length == 2){
             if("*".equals(args[1])){
-                notifyCommandListener(sender, this, "In total, there are "+ProtectionManager.PROTECTED_AREAS.size()+" protections present:");
+                sender.sendMessage(new TextComponentString("In total, there are "+ProtectionManager.PROTECTED_AREAS.size()+" protections present:"));
                 for(ProtectedArea area : ProtectionManager.PROTECTED_AREAS){
-                    notifyCommandListener(sender, this, area.toString());
+                    sender.sendMessage(new TextComponentString(area.toString()));
                 }
                 return;
             }
             else{
                 ProtectedArea area = ProtectionManager.byName(args[1]);
                 if(area != null){
-                    notifyCommandListener(sender, this, area.toString());
+                    sender.sendMessage(new TextComponentString(area.toString()));
                     return;
                 }
                 else{
@@ -75,7 +76,7 @@ public class SubCommandQuery extends CommandBase{
     }
 
     @Override
-    public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos){
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos pos){
         if(args.length == 2){
             List<String> names = new ArrayList<String>();
             for(ProtectedArea area : ProtectionManager.PROTECTED_AREAS){
@@ -84,7 +85,7 @@ public class SubCommandQuery extends CommandBase{
             return getListOfStringsMatchingLastWord(args, names);
         }
         else{
-            return super.getTabCompletionOptions(server, sender, args, pos);
+            return super.getTabCompletions(server, sender, args, pos);
         }
     }
 }
