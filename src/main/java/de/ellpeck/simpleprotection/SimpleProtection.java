@@ -4,7 +4,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 
-@Mod(modid = SimpleProtection.MOD_ID, name = SimpleProtection.NAME, version = SimpleProtection.VERSION, serverSideOnly = true, acceptableRemoteVersions = "*")
+@Mod(modid = SimpleProtection.MOD_ID, name = SimpleProtection.NAME, version = SimpleProtection.VERSION, serverSideOnly = true, acceptableRemoteVersions = "*", acceptedMinecraftVersions = "[1.11,1.11.2]")
 public class SimpleProtection{
 
     public static final String MOD_ID = "simpleprotection";
